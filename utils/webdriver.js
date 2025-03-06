@@ -13,9 +13,20 @@ class WebDriverUtils {
         // Create Chrome options
         const options = new chrome.Options();
 
-        // Create unique temp directory for each run
-        const tempDir = path.join(os.tmpdir(), `chrome-${Date.now()}`);
-        options.addArguments(`--user-data-dir=${tempDir}`);
+        // Add arguments for CI environment
+        options.addArguments('--headless');
+        options.addArguments('--no-sandbox');
+        options.addArguments('--disable-dev-shm-usage');
+        options.addArguments('--disable-gpu');
+        options.addArguments('--window-size=1920,1080');
+
+        // Don't use user-data-dir in CI to avoid conflicts
+        // Note: In a GitHub Actions environment, we skip setting a custom user data directory
+        const isCI = process.env.CI || process.env.GITHUB_ACTIONS;
+        if (!isCI) {
+            const tempDir = path.join(os.tmpdir(), `chrome-${Date.now()}`);
+            options.addArguments(`--user-data-dir=${tempDir}`);
+        }
 
         // Build the driver with proper browser specification
         this.driver = await new Builder()
