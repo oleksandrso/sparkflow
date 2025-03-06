@@ -1,5 +1,6 @@
-const { Builder, By, until } = require('selenium-webdriver');
-const config = require('../config/config');
+const { Builder, By, until, Capabilities } = require('selenium-webdriver');
+const os = require('os');
+const path = require('path');
 
 class WebDriverUtils {
     constructor() {
@@ -7,35 +8,20 @@ class WebDriverUtils {
     }
 
     async initialize() {
-        this.driver = await new Builder().forBrowser('chrome').build();
-        await this.driver.manage().setTimeouts({ implicit: config.timeouts.implicit, pageLoad: config.timeouts.pageLoad });
+        const chromeOptions = new Capabilities();
+        // Создаем уникальную временную директорию для каждого запуска
+        const tempDir = path.join(os.tmpdir(), `chrome-${Date.now()}`);
+        chromeOptions.set('chromeOptions', { args: [`--user-data-dir=${tempDir}`] });
+        this.driver = await new Builder()
+            .forBrowser('chrome')
+            .withCapabilities(chromeOptions)
+            .build();
+        await this.driver.manage().setTimeouts({ implicit: 10000, pageLoad: 15000 });
         return this.driver;
     }
 
     async quit() {
         if (this.driver) await this.driver.quit();
-    }
-
-    getDriver() {
-        return this.driver;
-    }
-
-    async getElement(selector) {
-        return await this.driver.wait(until.elementLocated(By.css(selector)), config.timeouts.implicit);
-    }
-
-    async getElements(selector) {
-        return await this.driver.findElements(By.css(selector));
-    }
-
-    async waitForVisible(selector) {
-        const element = await this.getElement(selector);
-        await this.driver.wait(until.elementIsVisible(element), config.timeouts.implicit);
-        return element;
-    }
-
-    async log(message) {
-        console.log(`[INFO] ${message}`);
     }
 }
 
