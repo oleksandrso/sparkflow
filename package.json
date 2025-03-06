@@ -1,0 +1,12 @@
+{
+  "name": "sparkflow",
+  "version": "1.0.0",
+  "description": "QA Automation Tests for Creative Page",
+  "scripts": {
+    "test": "mocha tests/*.spec.js --timeout 15000"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.11.1",
+    "mocha": "^10.2.0"
+  }
+}
